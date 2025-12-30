@@ -6,9 +6,8 @@ from math import pi, sin, cos, tan, log
 lon_range = np.arange(-180, 180, 2)
 lat_range = np.arange(-60, 92, 2)
 
-# 定义重采样函数
+# 插值
 def bilinear_interpolation(data):
-    # 使用xarray的interp函数进行双线性插值
     resampled_data = data.interp(lon=lon_range, lat=lat_range, method='linear')
     return resampled_data
 
@@ -17,25 +16,15 @@ def bilinear_interpolation(data):
 #     dataset = dataset.assign_coords({lon_name: (((dataset[lon_name] + 180) % 360) - 180)})
 #     dataset = dataset.sortby(lon_name)
     
-#     # 检查是否已经存在 180 度经度值，如果没有则添加
 #     if 180 not in dataset[lon_name].values:
-#         # 找到 -180 度的数据
 #         minus_180_data = dataset.sel({lon_name: -180}, method="nearest")
-        
-#         # 创建新的经度数组（包含 180 度）
 #         new_lon_values = np.append(dataset[lon_name].values, 180)
-        
-#         # 再次排序，确保单调递增
 #         new_lon_values_sorted = np.sort(new_lon_values)
-        
-#         # 扩展数据集（使用 reindex + fillna 确保数据连续性）
 #         dataset = dataset.reindex(
 #             {lon_name: new_lon_values_sorted},
-#             method="nearest",  # 使用最近邻填充
-#             tolerance=10  # 允许的最大距离（可选）
+#             method="nearest", 
+#             tolerance=10 
 #         )
-        
-#         # 确保 180 度的数据与 -180 度相同
 #         dataset.loc[{lon_name: 180}] = minus_180_data
     
 #     return dataset
@@ -47,32 +36,24 @@ def adjust_longitude(dataset):
     dataset = dataset.assign_coords({lon_name: (((dataset[lon_name] + 180) % 360) - 180)})
     dataset = dataset.sortby(lon_name)
     
-    # 检查是否已经包含 -180 和 180，如果没有则扩展
     lon_min = dataset[lon_name].min().item()
     lon_max = dataset[lon_name].max().item()
     
     if lon_min > -180 or lon_max < 180:
-        # 获取边界数据（用于填充 -180 和 180）
         left_data = dataset.sel({lon_name: lon_min}, method="nearest")
         right_data = dataset.sel({lon_name: lon_max}, method="nearest")
-        
-        # 创建新的经度数组（包含 -180 和 180）
         new_lon_values = np.unique(
             np.concatenate([
-                [-180],  # 强制添加 -180
+                [-180],
                 dataset[lon_name].values,
-                [180]    # 强制添加 180
+                [180] 
             ])
         )
-        
-        # 重新索引数据
         dataset = dataset.reindex(
             {lon_name: new_lon_values},
             method="nearest",  
-            tolerance=10       # 允许的最大距离（可选）
+            tolerance=10 
         )
-        
-        # 确保 -180 和 180 的数据与边界数据一致
         dataset.loc[{lon_name: -180}] = right_data
         dataset.loc[{lon_name: 180}] = left_data
     
@@ -106,7 +87,7 @@ def adjust_longitude(dataset):
 # spei_30 = prq30 * month_q30
 # hou30 = prh30 * month_h30
 
-# spei_30 = spei_30.where(spei_30 >= 0, 0) # 设置小于 0 的值等于 0
+# spei_30 = spei_30.where(spei_30 >= 0, 0)
 # hou30 = hou30.where(hou30 >= 0, 0)
 
 
@@ -168,4 +149,5 @@ co2 = Hou30 - SPEI3
 data = adjust_longitude(co2)
 rdata = bilinear_interpolation(data)
 rdata.to_netcdf(r"E:\CMIP6\UKESM\RN_bgc.nc")
+
 
