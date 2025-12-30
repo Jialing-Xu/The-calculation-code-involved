@@ -59,7 +59,6 @@ month_lengths = P.time.dt.days_in_month
 month_lengths_expanded = np.expand_dims(np.expand_dims(month_lengths, axis=1), axis=2)
 PET_total = PET * month_lengths_expanded
 
-# 创建数据集
 data = xr.Dataset(
     {
         "PET": (["time", "lat", "lon"], PET_total),
@@ -71,8 +70,9 @@ data = xr.Dataset(
     },
 )
 
-# 保存为nc文件
+# 保存
 output_file = "E:\\PET_results\\UKESM\\PET_co2.nc"
 data.to_netcdf(output_file)
 
 print(PET_total)
+
