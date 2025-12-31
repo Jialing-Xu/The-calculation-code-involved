@@ -94,7 +94,7 @@ Prradh30 = (Pradh30 * month_h30).where(lambda x: x >= 0, 0)
 Prbgcq30 = (Pbgcq30 * month_q30).where(lambda x: x >= 0, 0)
 Prbgch30 = (Pbgch30 * month_h30).where(lambda x: x >= 0, 0)
 
-months = PCTLh30['time.month'].values
+months = PrCTLh30['time.month'].values
 
 PCTL = PrCTLh30 - PrCTLq30.groupby('time.month').mean('time').sel(month=months).values
 Prad = Prradh30 - Prradq30.groupby('time.month').mean('time').sel(month=months).values
@@ -260,4 +260,5 @@ save_as_netcdf(Pint, r"E:\CMIP6\UKESM\P_int.nc")
 # save_as_netcdf(Urad, r"E:\CMIP6\UKESM\U_rad.nc")
 # save_as_netcdf(Ubgc, r"E:\CMIP6\UKESM\U_bgc.nc")
 # save_as_netcdf(Uint, r"E:\CMIP6\UKESM\U_int.nc")
+
 
